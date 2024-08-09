@@ -1,0 +1,37 @@
+<!-- uploadForm.ejs -->
+<html>
+  <head>
+    <title>Edit Folder</title>
+
+
+  </head>
+  <body>
+
+
+    <form action="/updateFolder/<%= folder.id %>" method="post" class="form-example">
+    <div class="form-example">
+      <label for="folder">Edit Folder: </label>
+      <input type="text" name="folder" id="folder" value= "<%=folder.name%>"/>
+    </div>
+     <% if (folder.files) { %>
+      <% folder.files.forEach(function(file) { %>
+       <div>file</div>
+    <% }); %>
+  <% } %>
+  <a href="/upload-file/<%=folder.id %>">Add file</a>
+    <div class="form-example">
+      <input type="submit" value="Update" />
+    </div>
+
+
+
+
+
+
+    <div class="form-example">
+      <input type="submit" value="Upload" />
+    </div>
+</form
+
+  </body>
+</html>
