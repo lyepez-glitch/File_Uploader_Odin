@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
-
+const cloudinary = require('./cloudinaryConfig');
 const prisma = new PrismaClient()
-
+const fs = require('fs');
 const express = require('express')
 
 require('dotenv').config();
@@ -175,27 +175,39 @@ app.post("/upload-file/:id", upload.array('photos', 12), async(req, res) => {
     let files = req.files;
     console.log(176, files);
     let newFiles = [];
-    files.forEach(async(file) => {
-        const newFile = await prisma.file.create({
-            data: {
-                fileName: file.filename,
-                folderId: folder.id;
-            }
+    try {
+        files.forEach(async(file) => {
+            const result = await cloudinary.uploader.upload(file.path);
+            const newFile = await prisma.file.create({
+                data: {
+                    filename: file.originalname,
+                    folderId: folder.id,
+                    path: file.path,
+                    size: file.size,
+                    url: result.secure_url
+                }
+            })
+            console.log('newfile', newFile)
+            newFiles.push({ id: newFile.id });
         })
-        newFiles.push(newFile);
-    })
+        const updateFile = await prisma.folder.update({
+            where: {
+                id: parseInt(id)
+            },
+            data: {
+                files: { connect: newFiles }
+
+            },
+        })
+        res.redirect('/');
+
+    } catch (e) {
+        console.log('181 e', e);
+    }
 
 
-    const updateFile = await prisma.folder.update({
-        where: {
-            id: parseInt(id)
-        },
-        data: {
-            files: folder.files.concat(newFiles)
 
-        },
-    })
-    res.redirect('/');
+
 })
 
 app.get("/createFolder", (req, res) => {
@@ -256,11 +268,46 @@ app.get("/deleteFolder/:id", async(req, res) => {
     const { id } = req.params;
     const deleteUser = await prisma.folder.delete({
         where: {
-            id: id
+            id: parseInt(id)
         },
     })
     console.log('deleted', deleteUser);
     res.redirect('/');
+
+})
+
+app.get("/details", async(req, res) => {
+    const { id, filename, size, createdAt, path } = req.query;
+    const file = {
+        id,
+        filename,
+        size,
+        createdAt,
+        path
+    }
+    console.log('file', file)
+    res.render('details', {
+        file
+    });
+})
+
+app.get("/download/uploads/:pathname", async(req, res) => {
+    const { pathname } = req.params;
+    const filePath = path.join(__dirname, '/uploads/',
+        pathname);
+    console.log('filepath', filePath)
+
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            return res.status(404).send("Can't find file");
+        }
+        res.download(filePath, (err) => {
+            if (err) {
+                console.error('Err downloading', err)
+                res.status(500).send('Error downloading')
+            }
+        })
+    })
 
 })
 

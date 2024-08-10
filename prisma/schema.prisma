@@ -34,9 +34,13 @@ model User {
 model File{
   id      Int      @id @default(autoincrement())
   filename    String
-  path   String
+  path String
   folderId  Int
-  folder Folder @relation(fields:[folderId],references: [id])
+  size Int @default(0)
+  createdAt DateTime @default(now())
+  url String
+  folder Folder @relation(fields:[folderId],references: [id],onDelete: Cascade)
+
 
 }
 

@@ -15,7 +15,8 @@
     </div>
      <% if (folder.files) { %>
       <% folder.files.forEach(function(file) { %>
-       <div>file</div>
+        <div><%= file.filename %></div>
+        <a href="/details?path=<%= file.path %>&id=<%= file.id %>&filename=<%= file.filename%>&size=<%= file.size %>&createdAt=<%= encodeURIComponent(file.createdAt.toISOString()) %>">Open</a>
     <% }); %>
   <% } %>
   <a href="/upload-file/<%=folder.id %>">Add file</a>

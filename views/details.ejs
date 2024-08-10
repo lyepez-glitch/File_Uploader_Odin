@@ -1,0 +1,19 @@
+<!-- details.ejs -->
+<html>
+  <head>
+    <title>Edit Folder</title>
+
+
+  </head>
+  <body>
+
+
+    <div>Name: <%= file.filename %></div>
+    <div>Size: <%= file.size %></div>
+    <div>Date: <%= file.createdAt %></div>
+     <a href="/download/<%= file.path%>">Download</a>
+
+
+
+  </body>
+</html>

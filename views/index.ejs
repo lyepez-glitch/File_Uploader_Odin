@@ -13,6 +13,7 @@
     <% if (folder.files) { %>
       <% folder.files.forEach(function(file) { %>
        <div><%= file.filename %></div>
+        <a href="/details?file=<%= file %>">Open</a>
     <% }); %>
   <% } %>
 
