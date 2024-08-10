@@ -175,8 +175,13 @@ app.post("/upload-file/:id", upload.array('photos', 12), async(req, res) => {
     let files = req.files;
     console.log(176, files);
     let newFiles = [];
+    console.log('Cloudinary Config:', {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
     try {
-        files.forEach(async(file) => {
+        for (const file of files) {
             const result = await cloudinary.uploader.upload(file.path);
             const newFile = await prisma.file.create({
                 data: {
@@ -189,7 +194,7 @@ app.post("/upload-file/:id", upload.array('photos', 12), async(req, res) => {
             })
             console.log('newfile', newFile)
             newFiles.push({ id: newFile.id });
-        })
+        }
         const updateFile = await prisma.folder.update({
             where: {
                 id: parseInt(id)
@@ -277,13 +282,14 @@ app.get("/deleteFolder/:id", async(req, res) => {
 })
 
 app.get("/details", async(req, res) => {
-    const { id, filename, size, createdAt, path } = req.query;
+    const { id, filename, size, createdAt, path, url } = req.query;
     const file = {
         id,
         filename,
         size,
         createdAt,
-        path
+        path,
+        url
     }
     console.log('file', file)
     res.render('details', {
@@ -291,23 +297,24 @@ app.get("/details", async(req, res) => {
     });
 })
 
-app.get("/download/uploads/:pathname", async(req, res) => {
-    const { pathname } = req.params;
-    const filePath = path.join(__dirname, '/uploads/',
-        pathname);
-    console.log('filepath', filePath)
+app.get("/download", async(req, res) => {
+    const { url } = req.query;
+    res.redirect(url);
+    // const filePath = path.join(__dirname, '/uploads/',
+    //     pathname);
+    // console.log('filepath', filePath)
 
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            return res.status(404).send("Can't find file");
-        }
-        res.download(filePath, (err) => {
-            if (err) {
-                console.error('Err downloading', err)
-                res.status(500).send('Error downloading')
-            }
-        })
-    })
+    // fs.access(filePath, fs.constants.F_OK, (err) => {
+    //     if (err) {
+    //         return res.status(404).send("Can't find file");
+    //     }
+    //     res.download(filePath, (err) => {
+    //         if (err) {
+    //             console.error('Err downloading', err)
+    //             res.status(500).send('Error downloading')
+    //         }
+    //     })
+    // })
 
 })
 
